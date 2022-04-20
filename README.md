@@ -4,4 +4,4 @@
 
 Sentinel's zero-trust security component in the MYSQL environment enhances the security of MYSQL data access in a non-invasive form.
 
-
+![process](./docs/process.png)
