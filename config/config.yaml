@@ -1,0 +1,6 @@
+server:
+  addr: "127.0.0.1:33306"
+
+confidential-storage:
+  type: valut # 机密存储组件
+  addr: http://127.0.0.1:9090
