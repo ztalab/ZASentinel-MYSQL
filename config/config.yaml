@@ -4,11 +4,11 @@ server:
 
 # target mysql
 confidential:
-  storage: vault # yaml、vault
+  storage: yaml # yaml、vault
   vault:
-    addr: http://192.168.2.250:18200
+    addr: http://xxxx:8200
     token: myroot
-    dataPath: testaaa
+    dataPath: test
   yaml:
     host: 127.0.0.1
     port: 3306
