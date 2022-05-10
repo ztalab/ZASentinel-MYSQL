@@ -15,7 +15,7 @@
  *  limitations under the License.
  */
 
-package tcpproxy
+package proxy
 
 import (
 	"context"
@@ -26,7 +26,6 @@ import (
 	"github.com/ztalab/ZASentinel-MYSQL/pkg/mysqlproxy/client"
 	"github.com/ztalab/ZASentinel-MYSQL/pkg/mysqlproxy/mysql"
 	"github.com/ztalab/ZASentinel-MYSQL/pkg/mysqlproxy/server"
-	"github.com/ztalab/ZASentinel-MYSQL/pkg/secret"
 	"github.com/ztalab/ZASentinel-MYSQL/utils"
 	"io"
 	"net"
@@ -36,33 +35,31 @@ import (
 
 const bufSize = 4096
 
-var (
-	// number of current active connections
-	activeConnCount int64
-	// total number of historical connections
-	totalConnCount int64
-)
-
 type MysqlTCPProxy struct {
 	ctx        context.Context
 	server     *server.Server
 	credential server.CredentialProvider
 	closed     atomic.Value
-	secret     secret.SecretStore
+	mysql      *config.Mysql
 }
 
-func Start(ctx context.Context, conf *config.Config, store secret.SecretStore) {
+func Start(ctx context.Context) {
 	p := &MysqlTCPProxy{
-		ctx:    ctx,
-		secret: store,
+		ctx: ctx,
 	}
+	// fake-identity
+	p.credential = server.NewInMemoryProvider()
+	logrus.Printf("%#v", config.Get())
+	p.credential.AddUser(config.Get().FakeIdentity.Username, config.Get().FakeIdentity.Password)
+	// secret
+	p.mysql = config.GetRemoteMysql()
+
 	p.server = server.NewDefaultServer()
-	p.credential = server.NewVaultProvider(store)
 
 	var err error
 
 	p.closed.Store(true)
-	ln, err := net.Listen("tcp4", conf.Server.Addr)
+	ln, err := net.Listen("tcp4", config.Get().Server.Addr)
 	if err != nil {
 		logrus.Errorf("listening port error：%v", err)
 		return
@@ -74,14 +71,14 @@ func Start(ctx context.Context, conf *config.Config, store secret.SecretStore) {
 		}
 	}, nil)
 	p.closed.Store(false)
-	logrus.Info("start ZASentinel-MYSQL...")
+	logrus.Infof("start ZASentinel-MYSQL, listen addr: %s", config.Get().Server.Addr)
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
 			if p.closed.Load().(bool) || errors.Is(err, io.EOF) {
 				return
 			}
-			logrus.Errorf("mysql代理监听错误：%v", err)
+			logrus.Errorf("mysql proxy listening error：%v", err)
 			return
 		}
 		go p.handle(conn)
@@ -89,29 +86,20 @@ func Start(ctx context.Context, conf *config.Config, store secret.SecretStore) {
 }
 
 func (p *MysqlTCPProxy) handle(conn net.Conn) {
-	atomic.AddInt64(&totalConnCount, 1)
-	atomic.AddInt64(&activeConnCount, 1)
 	defer func() {
-		atomic.AddInt64(&activeConnCount, -1)
 		err := recover()
 		if err != nil {
 			conn.Close()
 			buf := make([]byte, bufSize)
-			buf = buf[:runtime.Stack(buf, false)] // 获得当前goroutine的stacktrace
-			logrus.Errorf("panic错误:%s", string(buf))
+			buf = buf[:runtime.Stack(buf, false)]
+			logrus.Errorf("panic err:%s", string(buf))
 		}
 	}()
 
 	var remoteConn *client.Conn
 	clientConn, err := server.NewCustomizedConn(conn, p.server, p.credential, func(conn *server.Conn) error {
-		var addr, user, pass, dbname string
 		var err error
-		addr, user, pass, dbname, err = p.getAddrInfo(conn.GetUser())
-		if err != nil {
-			return fmt.Errorf("获取机密存储mysql连接信息失败: %v", err)
-		}
-		remoteConn, err = client.Connect(addr, user, pass, dbname, func(rconn *client.Conn) {
-			// 转发客户端能力标识
+		remoteConn, err = client.Connect(fmt.Sprintf("%s:%d", p.mysql.Host, p.mysql.Port), p.mysql.Username, p.mysql.Password, p.mysql.DBName, func(rconn *client.Conn) {
 			if conn.Charset() > 0 {
 				rconn.SetCollationID(conn.Charset())
 			}
@@ -127,12 +115,12 @@ func (p *MysqlTCPProxy) handle(conn net.Conn) {
 			}
 		})
 		if err != nil {
-			return fmt.Errorf("连接远程mysql失败: %v", err)
+			return fmt.Errorf("failed to connect to remote mysql: %v", err)
 		}
 		return nil
 	})
 	if err != nil {
-		logrus.Errorf("mysql连接错误：%v", err)
+		logrus.Errorf("mysql connection error：%v", err)
 		return
 	}
 	defer func() {
@@ -140,39 +128,17 @@ func (p *MysqlTCPProxy) handle(conn net.Conn) {
 		clientConn.Close()
 	}()
 
-	errc := make(chan error, 2)
+	stop := make(chan struct{}, 2)
 	ioCopy := func(dst, src net.Conn) {
 		buf := utils.ByteSliceGet(bufSize)
 		defer utils.ByteSlicePut(buf)
-		_, err := io.CopyBuffer(dst, src, buf)
-		errc <- err
+		_, _ = io.CopyBuffer(dst, src, buf)
+		stop <- struct{}{}
 	}
 	go ioCopy(remoteConn.Conn.Conn, clientConn.Conn.Conn)
 	go ioCopy(clientConn.Conn.Conn, remoteConn.Conn.Conn)
 	select {
-	case <-errc:
+	case <-stop:
 	case <-p.ctx.Done():
-	}
-}
-
-// 获取
-func (p *MysqlTCPProxy) getAddrInfo(alias string) (addr, user, pass, dbname string, err error) {
-	// 连接池不存在则创建
-	//var kv map[string]string
-	//kv, err = p.secret.Get(fmt.Sprintf("mysql_%s", alias), false)
-	//if err != nil {
-	//	return
-	//}
-	//addr = fmt.Sprintf("%s:%s", kv[server.VaultMysqlHost], kv[server.VaultMysqlPort])
-	//user = kv[server.VaultMysqlUsername]
-	//pass = kv[server.VaultMysqlPassword]
-	//dbname = kv[server.VaultMysqlDbname]
-	return
-}
-
-func Metrics() map[string]interface{} {
-	return map[string]interface{}{
-		"active_conn_count": atomic.LoadInt64(&activeConnCount),
-		"total_conn_count":  atomic.LoadInt64(&totalConnCount),
 	}
 }

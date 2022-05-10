@@ -15,8 +15,16 @@
 ----
 
 
+## Content
+- [install](#Install)
 
 
+## Install
+```shell
+git clone github.com/ztalab/ZASentinel-MYSQL
+
+make && make install
+```
 
 ## License
 

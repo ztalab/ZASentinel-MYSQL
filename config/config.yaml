@@ -1,6 +1,21 @@
 server:
   addr: "127.0.0.1:33306"
 
-confidential-storage:
-  type: valut # 机密存储组件
-  addr: http://127.0.0.1:9090
+
+# target mysql
+confidential:
+  storage: vault # yaml、vault
+  vault:
+    addr: http://192.168.2.250:18200
+    token: myroot
+    dataPath: testaaa
+  yaml:
+    host: 127.0.0.1
+    port: 3306
+    username: root
+    password: root
+    dbname: test
+
+fakeIdentity:
+  username: test1
+  password: test1
