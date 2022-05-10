@@ -23,6 +23,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 	"github.com/ztalab/ZASentinel-MYSQL/pkg/config"
+	"github.com/ztalab/ZASentinel-MYSQL/proxy"
 	"os"
 	"os/signal"
 	"syscall"
@@ -65,9 +66,8 @@ func main() {
 	app.Action = func(c *cli.Context) error {
 		ctx, cancel := context.WithCancel(context.TODO())
 		stop := make(chan struct{})
-
 		go func() {
-			//
+			proxy.Start(ctx)
 			stop <- struct{}{}
 		}()
 
@@ -82,11 +82,10 @@ func main() {
 func exitSignal(cancel context.CancelFunc, stop chan struct{}) error {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
-	for sig := range sigs {
-		switch sig {
-		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
+	for {
+		select {
+		case <-sigs:
 			cancel()
-
 			select {
 			case <-stop:
 				fmt.Println("shutdown！！！！")
@@ -94,8 +93,10 @@ func exitSignal(cancel context.CancelFunc, stop chan struct{}) error {
 				fmt.Println("timeout forced exit！！！！")
 			}
 			os.Exit(0)
-		case syscall.SIGHUP:
-			fmt.Println("+++++++++++++++++++++++++++++")
+		case <-stop:
+			cancel()
+			fmt.Println("shutdown！！！！")
+			os.Exit(0)
 		}
 	}
 	return nil
