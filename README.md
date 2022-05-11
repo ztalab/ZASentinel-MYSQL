@@ -147,6 +147,19 @@ Now your mysql database has been securely protected, and no microservice has its
 
 
 
+## 🗣️ Discussion
+
+### Discussions Page
+
+You can discuss or ask for help in [discussions](https://github.com/ztalab/ZASentinel-MYSQL).
+
+## 😃 Contribute
+
+### Bug Reports / Feature Requests
+If you want to report a bug or request a new feature. Free feel to open a [new issue](https://github.com/ztalab/ZASentinel-MYSQL/pulls).
+
+
+
 
 ## License
 
