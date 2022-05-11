@@ -48,7 +48,7 @@ When you decide to revoke the privileges, they will lose any relevant informatio
 server:
   # ZASentinel-MYSQL listen address
   # This address needs to be known to operations or developers
-  addr: ":33306"
+  addr: ":3306"
 
 # mysql database authorized for temporary access
 confidential:
@@ -93,7 +93,7 @@ for example:
 - The code is not standardized, and the mysql configuration information is leaked after being penetrated by the attack
 - After the connection address is leaked, blasting attacks can be carried out on the mysql database itself to affect other microservices
 
-Now there is a good solution, deploy a ZASentinel-MYSQL at the near end of each microservice to act as a mysql proxy, ZASentinel-MYSQL only listens to the intranet address (for example: 127.0.0.1), and creates a fake account password; when deploying microservices, inject the connection information of ZASentinel-MYSQL; When the microservice performs mysql operation, it will only connect to ZASentinel-MYSQL, and the microservice will not directly connect to the mysql database, so even if the connection information is leaked due to the microservice's own problems, It is also impossible to execute an attack with this false information.ZASentinel-MYSQL supports obtaining the account password and connection information of the mysql database from the vault confidential storage component at startup.These sensitive information is stored in its own memory, which can greatly ensure the security of the information
+Now there is a good solution, deploy a ZASentinel-MYSQL at the near end of each microservice to act as a mysql proxy, ZASentinel-MYSQL only listens to the intranet address (for example: 127.0.0.1), and creates a fake account password; when deploying microservices, inject the connection information of ZASentinel-MYSQL; When the microservice performs mysql operation, it will only connect to ZASentinel-MYSQL, and the microservice will not directly connect to the mysql database, so even if the connection information is leaked due to the microservice's own problems, It is also impossible to execute an attack with this false information. ZASentinel-MYSQL supports obtaining the account password and connection information of the mysql database from the vault confidential storage component at startup. These sensitive information is stored in its own memory, which can greatly ensure the security of the information
 
 ![example2.png](./docs/example2.png)
 
@@ -112,7 +112,7 @@ confidential:
     addr: http://xxxx:8200
     token: xxx
     dataPath: service1
-# Fake account passwords told to ops or developers
+# Tell the fake account and password of the microservice
 fakeIdentity:
   username: user
   password: pass
@@ -152,6 +152,8 @@ Now your mysql database has been securely protected, and no microservice has its
 ### Discussions Page
 
 You can discuss or ask for help in [discussions](https://github.com/ztalab/ZASentinel-MYSQL).
+
+
 
 ## 😃 Contribute
 
