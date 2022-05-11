@@ -2,7 +2,12 @@
 # ZASentinel-MYSQL
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/ztalab/ZASentinel-MYSQL)](https://github.com/ztalab/ZASentinel-MYSQL/blob/master/go.mod)
 
-⭐ The zero-trust security component in the MYSQL environment enhances the security of MYSQL data access in a non-intrusive form.
+
+
+**⭐ The zero-trust security component in the MYSQL environment enhances the security of MYSQL data access in a non-intrusive form.**
+
+
+
 ![process](./docs/process.png)
 
 ## 💪🏻 Features
@@ -26,7 +31,7 @@ make && make install
 
 
 
-## Example of use
+### 👋 Example of use 
 
 ### Use mode 1: Provisional authorization
 When you need to temporarily authorize a developer or operation and maintenance personnel to access the mysql database, and withdraw the permission after he completes his work;
