@@ -20,14 +20,15 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
-	"github.com/ztalab/ZASentinel-MYSQL/pkg/config"
-	"github.com/ztalab/ZASentinel-MYSQL/proxy"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/sirupsen/logrus"
+	"github.com/urfave/cli"
+	"github.com/ztalab/ZASentinel-MYSQL/pkg/config"
+	"github.com/ztalab/ZASentinel-MYSQL/proxy"
 )
 
 func main() {
