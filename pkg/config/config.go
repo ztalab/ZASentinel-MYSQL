@@ -15,12 +15,12 @@ package config
 
 import (
 	"fmt"
+	"github.com/tidwall/gjson"
+	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
-
-	"github.com/spf13/viper"
-	"github.com/tidwall/gjson"
 )
 
 const (
@@ -70,14 +70,13 @@ func InitConfig(path string) {
 		return
 	}
 	DefaultConfig = &Config{}
-	viper.SetConfigFile(path)
-	if err := viper.ReadInConfig(); err != nil {
+	f, err := os.Open(path)
+	if err != nil {
 		panic(err)
 	}
-	if err := viper.Unmarshal(DefaultConfig); err != nil {
+	if err = yaml.NewDecoder(f).Decode(DefaultConfig); err != nil {
 		panic(err)
 	}
-
 	switch DefaultConfig.Confidential.Storage {
 	case YamlStorage:
 	case VaultStorage:
