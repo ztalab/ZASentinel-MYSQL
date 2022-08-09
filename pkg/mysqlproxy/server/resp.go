@@ -1,5 +1,3 @@
-// Copyright 2022-present The Ztalab Authors.
-
 package server
 
 import (

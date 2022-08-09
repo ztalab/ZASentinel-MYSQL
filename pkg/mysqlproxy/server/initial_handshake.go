@@ -1,5 +1,3 @@
-// Copyright 2022-present The Ztalab Authors.
-
 package server
 
 // see: https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_connection_phase_packets_protocol_handshake_v10.html
