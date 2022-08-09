@@ -1,4 +1,3 @@
-// Copyright 2022-present The Ztalab Authors.
 package packet
 
 import (
