@@ -158,7 +158,7 @@ You can discuss or ask for help in [discussions](https://github.com/ztalab/ZASen
 ## 😃 Contribute
 
 ### Bug Reports / Feature Requests
-If you want to report a bug or request a new feature. Free feel to open a [new issue](https://github.com/ztalab/ZASentinel-MYSQL/pulls).
+If you want to report a bug or request a new feature. Free feel to open a [new issue](https://github.com/ztalab/ZASentinel-MYSQL/issues).
 
 
 
