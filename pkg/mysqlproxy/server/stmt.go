@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/pingcap/errors"
+
 	. "github.com/ztalab/ZASentinel-MYSQL/pkg/mysqlproxy/mysql"
 )
 

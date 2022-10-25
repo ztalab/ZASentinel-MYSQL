@@ -23,6 +23,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
+
 	"github.com/ztalab/ZASentinel-MYSQL/pkg/config"
 	"github.com/ztalab/ZASentinel-MYSQL/proxy"
 )

@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/siddontang/go/hack"
+
 	. "github.com/ztalab/ZASentinel-MYSQL/pkg/mysqlproxy/mysql"
 )
 

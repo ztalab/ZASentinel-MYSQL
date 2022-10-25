@@ -37,3 +37,14 @@ clean:
 
 run:
 	go run --race cmd/main.go -c config/config.yaml
+
+################################################################################
+# Target: format                                                              #
+################################################################################
+.PHONY: format
+format: modtidy
+	gofumpt -l -w . && goimports -local github.com/ztalab/ -w $(shell find ./ -type f -name '*.go' -not -path "./test")
+
+.PHONY: modtidy
+modtidy:
+	go mod tidy
