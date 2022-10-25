@@ -10,6 +10,7 @@ import (
 	"fmt"
 
 	"github.com/pingcap/errors"
+
 	. "github.com/ztalab/ZASentinel-MYSQL/pkg/mysqlproxy/mysql"
 )
 

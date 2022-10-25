@@ -23,6 +23,7 @@ import (
 	"sync/atomic"
 
 	"github.com/sirupsen/logrus"
+
 	"github.com/ztalab/ZASentinel-MYSQL/pkg/config"
 	"github.com/ztalab/ZASentinel-MYSQL/pkg/mysqlproxy/client"
 	"github.com/ztalab/ZASentinel-MYSQL/pkg/mysqlproxy/mysql"
